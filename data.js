@@ -3,6 +3,13 @@
 window.WORKS_OWNER = "kwonyujin119";
 window.WORKS = [
   {
+    repo: "test0",
+    title: "교안 작업장",
+    desc: "강의 교안을 브라우저에서 만들고 프레젠터 리모컨으로 발표하는 도구. 교안 1개가 JSON 파일 1개이며, 토큰을 연결하면 웹에서 편집·저장도 됩니다.",
+    url: "https://kwonyujin119.github.io/test0/",
+    tags: ["교육", "발표"]
+  },
+  {
     repo: "test2",
     title: "SAIL:41 · 지휘역량강화센터",
     desc: "인천소방학교 지휘역량강화센터 일정표·주요업무·개인업무 보드. 41망 톡방, 아침 브리핑, 현장지휘관 체크리스트 포함 (GitHub Pages + Supabase).",
@@ -68,5 +75,5 @@ window.WORKS = [
     tags: ["지휘", "오프라인"]
   }
 ];
-// 목록에서 숨길 리포 (이 페이지 자신, 빈 리포)
-window.WORKS_HIDE = ["testall", "test0"];
+// 목록에서 숨길 리포 (이 페이지 자신)
+window.WORKS_HIDE = ["testall"];
