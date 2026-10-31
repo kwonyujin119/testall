@@ -93,7 +93,7 @@
   .thumb .veil { position: absolute; inset: 0; }
   .thumb .ph { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 13px; gap: 6px; }
   .thumb .badge {
-    position: absolute; left: 10px; top: 10px; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 999px;
+    position: absolute; left: 10px; top: 10px; z-index: 2; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 999px;
     background: rgba(15,23,42,.72); color: #fff; backdrop-filter: blur(6px);
   }
   .thumb .badge.live::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; vertical-align: 1px; }
@@ -127,9 +127,109 @@
   .sheet .row { display: flex; gap: 8px; margin-top: 14px; }
   .sheet .row .btn { flex: 1; justify-content: center; }
   .handle { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: -6px auto 12px; }
+  .sheet a { text-decoration: underline; color: var(--accent); }
+  .sheet .note { margin: 6px 0 0; font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+  .sheet .err { color: #ef4444; font-size: 13px; min-height: 18px; margin-top: 8px; }
+  .field {
+    width: 100%; height: 46px; border-radius: 12px; border: 1px solid var(--line); background: var(--card2);
+    color: var(--text); padding: 0 14px; font-size: 16px; outline: none; margin-top: 10px;
+  }
+  .field:focus { border-color: var(--accent); }
+  .wide { width: 100%; justify-content: center; height: 46px; font-size: 15px; }
+
+  /* 입장 잠금 화면 */
+  body.locked { overflow: hidden; }
+  body.locked header, body.locked main, body.locked footer { visibility: hidden; }
+  .lock {
+    position: fixed; inset: 0; z-index: 60; display: none; place-items: center; padding: 24px 16px;
+    background:
+      radial-gradient(1000px 520px at 15% -10%, #312e81 0%, transparent 60%),
+      radial-gradient(800px 480px at 110% 110%, #155e75 0%, transparent 55%), #0b1222;
+    color: #e2e8f0;
+  }
+  body.locked .lock { display: grid; }
+  .lock-box { width: 100%; max-width: 340px; text-align: center; }
+  .lock-box img { width: 76px; height: 76px; border-radius: 20px; box-shadow: 0 12px 30px rgba(0,0,0,.45); }
+  .lock-box h2 { margin: 18px 0 4px; font-size: 21px; letter-spacing: -.01em; }
+  .lock-box p { margin: 0 0 20px; color: #94a3b8; font-size: 13.5px; }
+  .code-in {
+    width: 100%; height: 56px; border-radius: 16px; border: 1px solid #334155; background: rgba(255,255,255,.06);
+    color: #fff; font-size: 24px; letter-spacing: .45em; text-indent: .45em; text-align: center; outline: none;
+  }
+  .code-in:focus { border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96,165,250,.25); }
+  .lock-box .btn { width: 100%; justify-content: center; height: 50px; margin-top: 12px; font-size: 16px; }
+  .lock-err { min-height: 20px; margin-top: 12px; font-size: 13.5px; color: #f87171; }
+  .shake { animation: shake .35s; }
+  @keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+
+  /* 관리자 표시 */
+  .admin-pill { display: none; background: linear-gradient(135deg, #f59e0b, #eab308); color: #1f1300; border: 0; font-weight: 800; }
+  body.admin .admin-pill { display: inline-flex; }
+  @media (max-width: 420px) { body.admin .avatar { display: none; } }
+  body.admin #keyBtn { display: none; }
+  body.admin header { border-bottom: 2px solid #f59e0b; }
+  body.admin header::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px;
+    background: linear-gradient(90deg, #f59e0b, #fde047, #f59e0b);
+  }
+  .admin-banner { display: none; margin: 0 0 12px; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5;
+    background: color-mix(in srgb, #f59e0b 14%, var(--card)); border: 1px solid color-mix(in srgb, #f59e0b 45%, var(--line)); }
+  body.admin .admin-banner { display: block; }
+
+  /* 카드 공개/비공개 */
+  .vis {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px 8px 12px;
+    border-radius: 12px; background: var(--chip); border: 1px dashed color-mix(in srgb, #f59e0b 60%, var(--line));
+    font-size: 13px; font-weight: 700;
+  }
+  .vis small { color: var(--muted); font-weight: 500; margin-left: 4px; }
+  .switch { position: relative; width: 48px; height: 28px; flex: none; }
+  .switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
+  .switch span { position: absolute; inset: 0; border-radius: 999px; background: #94a3b8; transition: background .15s; }
+  .switch span::after {
+    content: ""; position: absolute; left: 3px; top: 3px; width: 22px; height: 22px; border-radius: 50%;
+    background: #fff; transition: transform .15s; box-shadow: 0 1px 3px rgba(0,0,0,.3);
+  }
+  .switch input:checked + span { background: #10b981; }
+  .switch input:checked + span::after { transform: translateX(20px); }
+  .switch input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .card.is-hidden { opacity: .6; border-style: dashed; }
+  .card.is-hidden:hover { opacity: .9; }
+  .card.changed { box-shadow: 0 0 0 2px #f59e0b, var(--shadow); }
+  .thumb .badge.private { left: auto; right: 10px; background: #b91c1c; }
+
+  .savebar {
+    position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 30;
+    transform: translate(-50%, 160%); transition: transform .2s ease;
+    display: flex; align-items: center; gap: 8px; max-width: calc(100% - 32px);
+    background: #111827; color: #fff; border: 1px solid #f59e0b; border-radius: 999px;
+    padding: 8px 8px 8px 16px; box-shadow: 0 10px 30px rgba(0,0,0,.4); font-size: 13.5px; white-space: nowrap;
+  }
+  .savebar.on { transform: translate(-50%, 0); }
+  .savebar .btn { padding: 9px 14px; }
+  .savebar .btn:not(.primary) { background: transparent; color: #fff; border-color: #475569; }
+  .toast {
+    position: fixed; left: 50%; top: calc(76px + env(safe-area-inset-top)); z-index: 70;
+    transform: translate(-50%, -16px); opacity: 0; pointer-events: none; transition: .2s ease;
+    background: #111827; color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 13.5px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35); max-width: calc(100% - 32px); text-align: center;
+  }
+  .toast.on { opacity: 1; transform: translate(-50%, 0); }
+  .toast.bad { background: #b91c1c; }
 </style>
 </head>
-<body>
+<body class="locked">
+<div class="lock" id="lock" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+  <form class="lock-box" id="lockForm" autocomplete="off">
+    <img src="icons/icon-192.png" alt="">
+    <h2 id="lockTitle">작업 모음</h2>
+    <p>입장 코드를 입력하세요</p>
+    <input class="code-in" id="lockCode" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="12" autocomplete="off" aria-label="입장 코드">
+    <button class="btn primary" type="submit">입장</button>
+    <div class="lock-err" id="lockErr" role="alert"></div>
+  </form>
+</div>
+
 <header>
   <div class="bar">
     <img class="avatar" id="avatar" alt="" src="https://avatars.githubusercontent.com/u/276926550?v=4&s=96">
@@ -137,7 +237,9 @@
       <h1>작업 모음</h1>
       <p id="subtitle">github.com/kwonyujin119</p>
     </div>
-    <button class="btn primary" id="installBtn" hidden>⤓ 앱 설치</button>
+    <button class="btn primary" id="installBtn" hidden>⤓ <span class="lbl-long">앱 설치</span><span class="lbl-short">설치</span></button>
+    <button class="btn admin-pill" id="adminPill" title="관리자 메뉴">🛡 관리자</button>
+    <button class="btn icon-btn" id="keyBtn" title="관리자 로그인" aria-label="관리자 로그인">🔑</button>
     <button class="btn icon-btn" id="themeBtn" title="테마 전환" aria-label="테마 전환">◐</button>
   </div>
   <div class="tools">
@@ -151,6 +253,7 @@
 
 <main>
   <p class="status" id="status"></p>
+  <div class="admin-banner"><b>🛡 관리자 모드</b> · 카드마다 공개 스위치가 있습니다. 끄면 비공개가 되어 일반 사용자에게 보이지 않고, 관리자에게만 흐리게 보입니다. 바꾼 뒤 아래 <b>저장</b>을 누르세요.</div>
   <section class="grid" id="grid" aria-live="polite"></section>
 </main>
 
@@ -165,6 +268,13 @@
   <div id="sheetBody"></div>
   <div class="row"><button class="btn" id="sheetClose">닫기</button></div>
 </div>
+
+<div class="savebar" id="savebar" role="status">
+  <span id="saveMsg"></span>
+  <button class="btn" id="saveCancel">취소</button>
+  <button class="btn primary" id="saveBtn">저장</button>
+</div>
+<div class="toast" id="toast" role="status"></div>
 
 <script src="data.js"></script>
 <script>
@@ -182,6 +292,51 @@
     return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
   };
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const store = {
+    get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
+    del: (k) => { try { localStorage.removeItem(k); } catch {} }
+  };
+  let toastTimer;
+  const toast = (msg, bad) => {
+    const t = $("#toast"); t.textContent = msg; t.classList.toggle("bad", !!bad); t.classList.add("on");
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("on"), bad ? 4500 : 2800);
+  };
+
+  // ---------- 입장·관리자 코드 (코드 자체가 아니라 SHA-256 해시만 둠) ----------
+  const SITE_REPO = "testall";
+  const H_USER  = "2665d9a4ca67380011b27d3b9790634af0e206acd8b98c9ed981dae43683ff9f";
+  const H_ADMIN = "9a974c81eae5b03719db6deb9e92679cabeba57020b8f02cb66a0989681c62ec";
+  const sha256 = async (s) => {
+    const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("testall:" + s));
+    return Array.from(new Uint8Array(b), (x) => x.toString(16).padStart(2, "0")).join("");
+  };
+  const savedAuth = store.get("works:auth");
+  let role = savedAuth === H_ADMIN ? "admin" : savedAuth === H_USER ? "user" : null;
+
+  // ---------- 공개/비공개 (visibility.json) ----------
+  let hidden = new Set();   // 저장된 비공개 목록
+  let pending = null;       // 관리자가 바꾸는 중인 목록 (저장 전)
+  const visOf = () => pending || hidden;
+  const changedCount = () => {
+    if (!pending) return 0;
+    let n = 0;
+    for (const r of pending) if (!hidden.has(r)) n++;
+    for (const r of hidden) if (!pending.has(r)) n++;
+    return n;
+  };
+  async function loadVisibility() {
+    try {
+      const r = await fetch("visibility.json", { cache: "no-store" });
+      if (r.ok) hidden = new Set((await r.json()).hidden || []);
+    } catch {}
+    // 방금 저장한 기기는 배포가 끝나기 전에도 저장한 값을 바로 씀
+    try {
+      const o = JSON.parse(store.get("works:visSaved") || "null");
+      if (o && Date.now() - o.t < 10 * 60 * 1000) hidden = new Set(o.hidden);
+    } catch {}
+    render();
+  }
 
   // ---------- 데이터: data.js + GitHub API(10분 캐시) ----------
   let works = (window.WORKS || []).map((w) => ({ ...w }));
@@ -201,7 +356,7 @@
           size: x.size, stars: x.stargazers_count, branch: x.default_branch, url: x.html_url
         }));
         try { localStorage.setItem(KEY, JSON.stringify({ t: Date.now(), repos })); } catch {}
-      } catch (e) { status.textContent = "GitHub 최신 정보를 불러오지 못했습니다 (저장된 목록 표시)"; return; }
+      } catch (e) { ghStamp = "GitHub 최신 정보를 불러오지 못했습니다"; render(); return; }
     }
     const byName = new Map(repos.map((r) => [r.name, r]));
     for (const w of works) {
@@ -217,8 +372,17 @@
       });
     }
     works.sort((a, b) => new Date(b.pushed || 0) - new Date(a.pushed || 0));
-    status.textContent = `${works.length}개 작업 · GitHub 기준 ${fmtDate(repos[0]?.pushed)} 갱신`;
+    ghStamp = `GitHub 기준 ${fmtDate(repos[0]?.pushed)} 갱신`;
     render();
+  }
+  let ghStamp = "";
+  function updateStatus(all) {
+    const priv = all.filter((w) => visOf().has(w.repo)).length;
+    const parts = role === "admin"
+      ? [`${all.length}개 작업`, `공개 ${all.length - priv}`, `비공개 ${priv}`]
+      : [`${all.length - all.filter((w) => hidden.has(w.repo)).length}개 작업`];
+    if (ghStamp) parts.push(ghStamp);
+    status.textContent = parts.join(" · ");
   }
 
   // ---------- 렌더 ----------
@@ -250,16 +414,32 @@
 
   function ogImage(repo) { return `https://opengraph.githubassets.com/1/${OWNER}/${repo}`; }
 
+  function visHTML(priv) {
+    return priv ? `🔒 비공개<small>관리자만 보임</small>` : `🌐 공개<small>모두에게 보임</small>`;
+  }
+  function paintCard(card) {
+    const repo = card.dataset.repo, priv = visOf().has(repo);
+    card.classList.toggle("is-hidden", priv);
+    card.classList.toggle("changed", !!pending && pending.has(repo) !== hidden.has(repo));
+    const lab = card.querySelector(".vis-label"); if (lab) lab.innerHTML = visHTML(priv);
+    const b = card.querySelector(".badge.private"); if (b) b.hidden = !priv;
+    const i = card.querySelector(".switch input"); if (i) i.checked = !priv;
+  }
+
   function render() {
+    if (!role) { grid.innerHTML = ""; return; }
+    const isAdmin = role === "admin";
     const kw = q.value.trim().toLowerCase();
-    const list = works.filter((w) => !HIDE.has(w.repo)).filter((w) =>
+    const all = works.filter((w) => !HIDE.has(w.repo));
+    updateStatus(all);
+    const list = all.filter((w) => isAdmin || !hidden.has(w.repo)).filter((w) =>
       !kw || [w.title, w.desc, w.repo, ...(w.tags || [])].join(" ").toLowerCase().includes(kw));
     grid.innerHTML = "";
-    if (!list.length) { grid.innerHTML = `<div class="empty">검색 결과가 없습니다</div>`; return; }
+    if (!list.length) { grid.innerHTML = `<div class="empty">${kw ? "검색 결과가 없습니다" : "공개된 작업이 없습니다"}</div>`; return; }
     for (const w of list) {
       const gh = w.gh || `https://github.com/${OWNER}/${w.repo}${w.branch ? `/tree/${w.branch}` : ""}`;
       const open = w.url || gh;
-      const card = document.createElement("article"); card.className = "card";
+      const card = document.createElement("article"); card.className = "card"; card.dataset.repo = w.repo;
       const useLive = live && !!w.url;
       card.innerHTML = `
         <a class="thumb" href="${esc(open)}" target="_blank" rel="noopener" ${useLive ? `data-src="${esc(w.url)}"` : ""} aria-label="${esc(w.title)} 열기">
@@ -268,8 +448,11 @@
             : `<img loading="lazy" alt="" src="${esc(ogImage(w.repo))}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',textContent:'미리보기 없음'}))">`}
           <span class="veil"></span>
           <span class="badge ${w.url ? "live" : ""}">${w.url ? (useLive ? "LIVE" : "PAGES") : "GITHUB"}</span>
+          ${isAdmin ? `<span class="badge private" hidden>🔒 비공개</span>` : ""}
         </a>
         <div class="body">
+          ${isAdmin ? `<div class="vis"><span class="vis-label"></span>
+            <label class="switch" title="공개 / 비공개"><input type="checkbox" aria-label="${esc(w.title)} 공개"><span></span></label></div>` : ""}
           <div class="title"><h2>${esc(w.title)}</h2><span class="repo">${esc(w.repo)}</span></div>
           <p class="desc">${esc(w.desc || "설명 없음")}</p>
           <div class="meta">
@@ -284,12 +467,166 @@
           </div>
         </div>`;
       grid.appendChild(card);
+      if (isAdmin) paintCard(card);
       const th = card.querySelector(".thumb");
       if (useLive) { fitFrame(th); io ? io.observe(th) : loadFrame(th); }
     }
   }
-  status.textContent = `${works.length}개 작업`;
-  render();
+
+  // 스위치: 다시 그리지 않고 카드만 갱신 (미리보기 iframe 유지)
+  grid.addEventListener("change", (e) => {
+    const input = e.target.closest(".switch input"); if (!input || role !== "admin") return;
+    const card = input.closest(".card"), repo = card.dataset.repo;
+    if (!pending) pending = new Set(hidden);
+    input.checked ? pending.delete(repo) : pending.add(repo);
+    if (!changedCount()) pending = null;
+    paintCard(card);
+    updateStatus(works.filter((w) => !HIDE.has(w.repo)));
+    updateSavebar();
+  });
+
+  // ---------- 저장 바 ----------
+  const savebar = $("#savebar"), saveBtn = $("#saveBtn");
+  function updateSavebar() {
+    const n = role === "admin" ? changedCount() : 0;
+    $("#saveMsg").textContent = `변경 ${n}건`;
+    savebar.classList.toggle("on", n > 0);
+  }
+  $("#saveCancel").addEventListener("click", () => {
+    pending = null; document.querySelectorAll(".card[data-repo]").forEach(paintCard);
+    updateStatus(works.filter((w) => !HIDE.has(w.repo))); updateSavebar();
+  });
+  saveBtn.addEventListener("click", () => saveVisibility());
+  window.addEventListener("beforeunload", (e) => { if (changedCount()) { e.preventDefault(); e.returnValue = ""; } });
+
+  // ---------- GitHub에 visibility.json 저장 ----------
+  const TOKEN_KEY = "works:ghToken";
+  const ghHeaders = (t) => ({ Authorization: `Bearer ${t}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" });
+  async function saveVisibility() {
+    if (!changedCount()) return;
+    const token = store.get(TOKEN_KEY);
+    if (!token) { openTokenSheet(true); return; }
+    const api = `https://api.github.com/repos/${OWNER}/${SITE_REPO}/contents/visibility.json`;
+    saveBtn.disabled = true; saveBtn.textContent = "저장 중…";
+    try {
+      let sha;
+      const g = await fetch(`${api}?ref=main`, { headers: ghHeaders(token), cache: "no-store" });
+      if (g.status === 401) throw Object.assign(new Error("토큰이 만료되었거나 잘못되었습니다"), { auth: true });
+      if (g.ok) sha = (await g.json()).sha;
+      const list = [...pending].sort();
+      const json = JSON.stringify({ hidden: list, updated: new Date().toISOString() }, null, 2) + "\n";
+      const content = btoa(String.fromCharCode(...new TextEncoder().encode(json)));
+      const p = await fetch(api, {
+        method: "PUT", headers: ghHeaders(token),
+        body: JSON.stringify({ message: `카드 공개 설정 변경 (비공개 ${list.length}개)`, content, sha, branch: "main" })
+      });
+      if (p.status === 401 || p.status === 403) throw Object.assign(new Error("토큰에 testall 쓰기 권한이 없습니다"), { auth: true });
+      if (!p.ok) throw new Error(`GitHub 저장 실패 (${p.status})`);
+      hidden = new Set(list); pending = null;
+      store.set("works:visSaved", JSON.stringify({ t: Date.now(), hidden: list }));
+      document.querySelectorAll(".card[data-repo]").forEach(paintCard);
+      updateStatus(works.filter((w) => !HIDE.has(w.repo))); updateSavebar();
+      toast("저장했습니다 · 1~2분 뒤 모든 사람에게 반영됩니다");
+    } catch (err) {
+      toast(err.message || "저장하지 못했습니다", true);
+      if (err.auth) openTokenSheet(true);
+    } finally {
+      saveBtn.disabled = false; saveBtn.textContent = "저장";
+    }
+  }
+
+  function openTokenSheet(thenSave) {
+    showSheet(`
+      <p class="note">공개 설정을 모든 사람에게 적용하려면 이 기기에 GitHub 토큰이 한 번 필요합니다. 토큰은 이 기기 브라우저에만 저장되고 GitHub 외에는 보내지 않습니다.</p>
+      <ol>
+        <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub 토큰 만들기</a>를 엽니다 (Fine-grained token).</li>
+        <li>Repository access → <b>Only select repositories</b> → <b>${SITE_REPO}</b></li>
+        <li>Permissions → Repository permissions → <b>Contents: Read and write</b></li>
+        <li><b>Generate token</b>을 누르고 나온 값을 아래에 붙여넣습니다.</li>
+      </ol>
+      <input class="field" id="tokIn" type="password" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
+      <div class="err" id="tokErr"></div>
+      <button class="btn primary wide" id="tokSave">확인 후 ${thenSave ? "저장" : "보관"}</button>`, "GitHub 토큰");
+    $("#tokSave").addEventListener("click", async () => {
+      const t = $("#tokIn").value.trim(), err = $("#tokErr");
+      if (!t) { err.textContent = "토큰을 붙여넣어 주세요"; return; }
+      err.textContent = "확인 중…";
+      try {
+        const r = await fetch(`https://api.github.com/repos/${OWNER}/${SITE_REPO}`, { headers: ghHeaders(t), cache: "no-store" });
+        if (!r.ok) { err.textContent = r.status === 401 ? "토큰이 올바르지 않습니다" : `이 토큰으로 ${SITE_REPO} 리포를 볼 수 없습니다 (${r.status})`; return; }
+        const j = await r.json();
+        if (j.permissions && !j.permissions.push) { err.textContent = "Contents 쓰기(Read and write) 권한이 없습니다"; return; }
+      } catch { err.textContent = "GitHub에 연결하지 못했습니다"; return; }
+      store.set(TOKEN_KEY, t); hideSheet(); toast("토큰을 이 기기에 저장했습니다");
+      if (thenSave) saveVisibility();
+    });
+  }
+
+  // ---------- 입장 / 관리자 로그인 ----------
+  const lockCode = $("#lockCode"), lockErr = $("#lockErr"), lockForm = $("#lockForm");
+  function setRole(r) {
+    role = r;
+    r ? store.set("works:auth", r === "admin" ? H_ADMIN : H_USER) : store.del("works:auth");
+    if (r !== "admin") pending = null;
+    applyRole();
+  }
+  function applyRole() {
+    document.body.classList.toggle("locked", !role);
+    document.body.classList.toggle("admin", role === "admin");
+    updateSavebar(); render();
+    if (!role) setTimeout(() => lockCode.focus(), 50);
+  }
+  lockForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const v = lockCode.value.trim(); if (!v) return;
+    const h = await sha256(v);
+    if (h === H_ADMIN) { setRole("admin"); toast("관리자로 로그인했습니다"); }
+    else if (h === H_USER) setRole("user");
+    else {
+      lockErr.textContent = "코드가 맞지 않습니다";
+      lockForm.classList.remove("shake"); void lockForm.offsetWidth; lockForm.classList.add("shake");
+      lockCode.select(); return;
+    }
+    lockCode.value = ""; lockErr.textContent = "";
+  });
+
+  $("#keyBtn").addEventListener("click", () => {
+    showSheet(`
+      <p class="note">관리자 코드를 입력하면 카드를 공개·비공개로 바꿀 수 있습니다.</p>
+      <form id="adminForm" autocomplete="off">
+        <input class="field" id="adminCode" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="관리자 코드" aria-label="관리자 코드">
+        <div class="err" id="adminErr"></div>
+        <button class="btn primary wide">로그인</button>
+      </form>`, "관리자 로그인");
+    setTimeout(() => $("#adminCode")?.focus(), 250);
+    $("#adminForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (await sha256($("#adminCode").value.trim()) === H_ADMIN) { hideSheet(); setRole("admin"); toast("관리자로 로그인했습니다"); }
+      else { $("#adminErr").textContent = "관리자 코드가 맞지 않습니다"; $("#adminCode").select(); }
+    });
+  });
+
+  $("#adminPill").addEventListener("click", () => {
+    const hasTok = !!store.get(TOKEN_KEY);
+    showSheet(`
+      <p class="note">관리자 모드입니다. 카드의 공개 스위치를 끄면 비공개가 되고, 저장하면 일반 사용자 화면에서 사라집니다.</p>
+      <p class="note">GitHub 저장 토큰: <b>${hasTok ? "이 기기에 저장됨" : "없음 (처음 저장할 때 입력)"}</b></p>
+      <div class="row">
+        <button class="btn" id="tokBtn">${hasTok ? "토큰 바꾸기" : "토큰 넣기"}</button>
+        ${hasTok ? `<button class="btn" id="tokDel">토큰 삭제</button>` : ""}
+      </div>
+      <div class="row">
+        <button class="btn" id="adminOut">관리자 로그아웃</button>
+        <button class="btn" id="lockOut">잠그기</button>
+      </div>`, "🛡 관리자");
+    $("#tokBtn").addEventListener("click", () => openTokenSheet(false));
+    $("#tokDel")?.addEventListener("click", () => { store.del(TOKEN_KEY); hideSheet(); toast("토큰을 삭제했습니다"); });
+    $("#adminOut").addEventListener("click", () => { hideSheet(); setRole("user"); toast("관리자 모드를 끝냈습니다"); });
+    $("#lockOut").addEventListener("click", () => { hideSheet(); setRole(null); });
+  });
+
+  applyRole();
+  loadVisibility();
   refreshFromGitHub();
 
   // ---------- 테마 ----------
@@ -308,8 +645,10 @@
   const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
   const inApp = /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\//i.test(navigator.userAgent);
-  const showSheet = (html) => { sheetBody.innerHTML = html; sheet.classList.add("on"); sheetBg.classList.add("on"); };
-  const hideSheet = () => { sheet.classList.remove("on"); sheetBg.classList.remove("on"); };
+  function showSheet(html, title = "홈 화면에 추가") {
+    $("#sheetTitle").textContent = title; sheetBody.innerHTML = html; sheet.classList.add("on"); sheetBg.classList.add("on");
+  }
+  function hideSheet() { sheet.classList.remove("on"); sheetBg.classList.remove("on"); }
   $("#sheetClose").addEventListener("click", hideSheet); sheetBg.addEventListener("click", hideSheet);
 
   window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferred = e; if (!standalone) installBtn.hidden = false; });

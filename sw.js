@@ -1,9 +1,10 @@
 // 작업 모음 서비스 워커 — 앱 껍데기는 캐시, 내용은 네트워크 우선
-const VERSION = "works-v1";
+const VERSION = "works-v2";
 const SHELL = [
   "./",
   "./index.html",
   "./data.js",
+  "./visibility.json",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
