@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>작업 모음 · kwonyujin119</title>
+<meta name="description" content="GitHub에서 작업한 페이지들을 미리보기와 링크로 한곳에 모은 앱">
+<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="작업모음">
+<style>
+  :root {
+    --bg: #0f172a; --bg2: #111c33; --card: #1e293b; --card2: #243247;
+    --text: #e2e8f0; --muted: #94a3b8; --line: #334155;
+    --accent: #60a5fa; --accent2: #22d3ee; --chip: #0b1222;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+    --radius: 18px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f1f5f9; --bg2: #e8eef6; --card: #ffffff; --card2: #f8fafc;
+      --text: #0f172a; --muted: #64748b; --line: #e2e8f0;
+      --accent: #2563eb; --accent2: #0891b2; --chip: #eef2f7;
+      --shadow: 0 10px 30px rgba(15,23,42,.08);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+    -webkit-font-smoothing: antialiased; overscroll-behavior-y: none;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+  a { color: inherit; text-decoration: none; }
+
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+    padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  }
+  .bar { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--card2); border: 1px solid var(--line); flex: none; }
+  .brand { flex: 1; min-width: 0; }
+  .brand h1 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand p { margin: 2px 0 0; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .btn {
+    appearance: none; border: 1px solid var(--line); background: var(--card); color: var(--text);
+    border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px; line-height: 1; white-space: nowrap;
+  }
+  .btn.primary { background: linear-gradient(135deg, #4f46e5, #06b6d4); color: #fff; border-color: transparent; }
+  .btn:active { transform: translateY(1px); }
+  .icon-btn { width: 38px; height: 38px; padding: 0; justify-content: center; border-radius: 50%; font-size: 17px; }
+
+  .tools { max-width: 1200px; margin: 10px auto 0; display: flex; gap: 8px; align-items: center; }
+  .search { flex: 1; display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 0 12px; height: 38px; }
+  .search input { flex: 1; border: 0; outline: 0; background: transparent; color: var(--text); font-size: 15px; min-width: 0; }
+  .search input::placeholder { color: var(--muted); }
+  .toggle { font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; white-space: nowrap; }
+  .toggle input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+  .lbl-short { display: none; }
+  @media (max-width: 420px) { .lbl-long { display: none; } .lbl-short { display: inline; } }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 14px 16px 0; }
+  .status { font-size: 12px; color: var(--muted); margin: 0 0 10px 2px; min-height: 16px; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 640px)  { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column;
+    transition: transform .15s ease, border-color .15s ease;
+  }
+  .card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); }
+  .thumb {
+    position: relative; aspect-ratio: 16 / 10; background: var(--card2); overflow: hidden; display: block;
+    border-bottom: 1px solid var(--line);
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: contain; display: block; background: #fff; }
+  .thumb iframe {
+    position: absolute; left: 0; top: 0; border: 0; pointer-events: none; background: #fff;
+    width: var(--fw, 1280px); height: calc(var(--fw, 1280px) * 10 / 16); z-index: 1;
+    transform-origin: 0 0; transform: scale(var(--sc, .25));
+  }
+  .thumb .veil { position: absolute; inset: 0; }
+  .thumb .ph { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 13px; gap: 6px; }
+  .thumb .badge {
+    position: absolute; left: 10px; top: 10px; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 999px;
+    background: rgba(15,23,42,.72); color: #fff; backdrop-filter: blur(6px);
+  }
+  .thumb .badge.live::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; vertical-align: 1px; }
+  .body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .title { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+  .title h2 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -.01em; line-height: 1.3; }
+  .title .repo { font-size: 12px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .desc { margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 11.5px; color: var(--muted); }
+  .chip { background: var(--chip); border: 1px solid var(--line); border-radius: 999px; padding: 3px 8px; }
+  .chip.lang::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--dot, var(--accent)); margin-right: 5px; }
+  .actions { display: flex; gap: 8px; margin-top: auto; padding-top: 4px; flex-wrap: wrap; }
+  .actions .btn { padding: 9px 14px; font-size: 13px; }
+  .actions .btn.go { flex: 1; justify-content: center; }
+  .empty { text-align: center; color: var(--muted); padding: 60px 0; }
+
+  footer { max-width: 1200px; margin: 28px auto 0; padding: 0 16px; font-size: 12px; color: var(--muted); text-align: center; }
+
+  /* 설치 안내 시트 */
+  .sheet-bg { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; z-index: 40; }
+  .sheet-bg.on { display: block; }
+  .sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; background: var(--card); color: var(--text);
+    border-radius: 20px 20px 0 0; padding: 18px 18px calc(18px + env(safe-area-inset-bottom));
+    transform: translateY(110%); transition: transform .25s ease; max-width: 560px; margin: 0 auto;
+    box-shadow: 0 -10px 40px rgba(0,0,0,.35);
+  }
+  .sheet.on { transform: none; }
+  .sheet h3 { margin: 0 0 8px; font-size: 17px; }
+  .sheet ol { margin: 8px 0 0; padding-left: 20px; font-size: 14px; line-height: 1.7; color: var(--muted); }
+  .sheet .row { display: flex; gap: 8px; margin-top: 14px; }
+  .sheet .row .btn { flex: 1; justify-content: center; }
+  .handle { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: -6px auto 12px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <img class="avatar" id="avatar" alt="" src="https://avatars.githubusercontent.com/u/276926550?v=4&s=96">
+    <div class="brand">
+      <h1>작업 모음</h1>
+      <p id="subtitle">github.com/kwonyujin119</p>
+    </div>
+    <button class="btn primary" id="installBtn" hidden>⤓ 앱 설치</button>
+    <button class="btn icon-btn" id="themeBtn" title="테마 전환" aria-label="테마 전환">◐</button>
+  </div>
+  <div class="tools">
+    <label class="search">
+      <span aria-hidden="true">🔍</span>
+      <input id="q" type="search" placeholder="제목, 설명, 리포 이름 검색" autocomplete="off">
+    </label>
+    <label class="toggle"><input type="checkbox" id="liveToggle" checked> <span class="lbl-long">라이브 미리보기</span><span class="lbl-short">라이브</span></label>
+  </div>
+</header>
+
+<main>
+  <p class="status" id="status"></p>
+  <section class="grid" id="grid" aria-live="polite"></section>
+</main>
+
+<footer>
+  카드 데이터는 <a href="https://github.com/kwonyujin119/testall/blob/main/data.js" style="text-decoration:underline">data.js</a>에서 고칠 수 있습니다 · 새 리포는 자동으로 추가됩니다
+</footer>
+
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="handle"></div>
+  <h3 id="sheetTitle">홈 화면에 추가</h3>
+  <div id="sheetBody"></div>
+  <div class="row"><button class="btn" id="sheetClose">닫기</button></div>
+</div>
+
+<script src="data.js"></script>
+<script>
+(() => {
+  const OWNER = window.WORKS_OWNER || "kwonyujin119";
+  const HIDE = new Set(window.WORKS_HIDE || []);
+  const $ = (s) => document.querySelector(s);
+  const grid = $("#grid"), status = $("#status"), q = $("#q"), liveToggle = $("#liveToggle");
+
+  const LANG_DOT = { HTML: "#e34c26", JavaScript: "#f1e05a", Python: "#3572A5", CSS: "#563d7c", TypeScript: "#3178c6" };
+  const fmtDate = (iso) => {
+    if (!iso) return "";
+    const d = new Date(iso), diff = (Date.now() - d) / 864e5;
+    if (diff < 1) return "오늘"; if (diff < 2) return "어제"; if (diff < 30) return `${Math.floor(diff)}일 전`;
+    return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+  };
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  // ---------- 데이터: data.js + GitHub API(10분 캐시) ----------
+  let works = (window.WORKS || []).map((w) => ({ ...w }));
+  async function refreshFromGitHub() {
+    const KEY = "works:gh", TTL = 10 * 60 * 1000;
+    let repos = null;
+    try {
+      const c = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (c && Date.now() - c.t < TTL) repos = c.repos;
+    } catch {}
+    if (!repos) {
+      try {
+        const r = await fetch(`https://api.github.com/users/${OWNER}/repos?per_page=100&sort=updated`, { headers: { Accept: "application/vnd.github+json" } });
+        if (!r.ok) throw new Error(r.status);
+        repos = (await r.json()).map((x) => ({
+          name: x.name, desc: x.description, lang: x.language, pushed: x.pushed_at, pages: x.has_pages,
+          size: x.size, stars: x.stargazers_count, branch: x.default_branch, url: x.html_url
+        }));
+        try { localStorage.setItem(KEY, JSON.stringify({ t: Date.now(), repos })); } catch {}
+      } catch (e) { status.textContent = "GitHub 최신 정보를 불러오지 못했습니다 (저장된 목록 표시)"; return; }
+    }
+    const byName = new Map(repos.map((r) => [r.name, r]));
+    for (const w of works) {
+      const r = byName.get(w.repo); if (!r) continue;
+      w.lang = r.lang; w.pushed = r.pushed; w.stars = r.stars; w.gh = r.url;
+      if (!w.desc && r.desc) w.desc = r.desc;
+    }
+    for (const r of repos) {
+      if (HIDE.has(r.name) || works.some((w) => w.repo === r.name) || r.size === 0) continue;
+      works.push({
+        repo: r.name, title: r.name, desc: r.desc || "", lang: r.lang, pushed: r.pushed, stars: r.stars, gh: r.url,
+        url: r.pages ? `https://${OWNER}.github.io/${r.name}/` : null, tags: [], auto: true
+      });
+    }
+    works.sort((a, b) => new Date(b.pushed || 0) - new Date(a.pushed || 0));
+    status.textContent = `${works.length}개 작업 · GitHub 기준 ${fmtDate(repos[0]?.pushed)} 갱신`;
+    render();
+  }
+
+  // ---------- 렌더 ----------
+  let live = true;
+  try { live = localStorage.getItem("works:live") !== "0"; } catch {}
+  liveToggle.checked = live;
+  liveToggle.addEventListener("change", () => { live = liveToggle.checked; try { localStorage.setItem("works:live", live ? "1" : "0"); } catch {} render(); });
+  q.addEventListener("input", render);
+
+  const io = ("IntersectionObserver" in window) ? new IntersectionObserver((ents) => {
+    for (const en of ents) if (en.isIntersecting) { loadFrame(en.target); io.unobserve(en.target); }
+  }, { rootMargin: "200px 0px" }) : null;
+
+  function loadFrame(thumb) {
+    const src = thumb.dataset.src; if (!src || thumb.querySelector("iframe")) return;
+    const f = document.createElement("iframe");
+    f.title = "미리보기"; f.loading = "lazy"; f.tabIndex = -1; f.setAttribute("aria-hidden", "true");
+    f.referrerPolicy = "no-referrer";
+    f.src = src;
+    thumb.insertBefore(f, thumb.firstChild);
+    fitFrame(thumb);
+    f.addEventListener("load", () => { const ph = thumb.querySelector(".ph"); if (ph) ph.remove(); });
+  }
+  function fitFrame(thumb) {
+    const w = thumb.clientWidth || 360; const FW = w < 420 ? 960 : 1280;
+    thumb.style.setProperty("--fw", FW + "px"); thumb.style.setProperty("--sc", (w / FW).toFixed(4));
+  }
+  window.addEventListener("resize", () => document.querySelectorAll(".thumb[data-src]").forEach(fitFrame));
+
+  function ogImage(repo) { return `https://opengraph.githubassets.com/1/${OWNER}/${repo}`; }
+
+  function render() {
+    const kw = q.value.trim().toLowerCase();
+    const list = works.filter((w) => !HIDE.has(w.repo)).filter((w) =>
+      !kw || [w.title, w.desc, w.repo, ...(w.tags || [])].join(" ").toLowerCase().includes(kw));
+    grid.innerHTML = "";
+    if (!list.length) { grid.innerHTML = `<div class="empty">검색 결과가 없습니다</div>`; return; }
+    for (const w of list) {
+      const gh = w.gh || `https://github.com/${OWNER}/${w.repo}${w.branch ? `/tree/${w.branch}` : ""}`;
+      const open = w.url || gh;
+      const card = document.createElement("article"); card.className = "card";
+      const useLive = live && !!w.url;
+      card.innerHTML = `
+        <a class="thumb" href="${esc(open)}" target="_blank" rel="noopener" ${useLive ? `data-src="${esc(w.url)}"` : ""} aria-label="${esc(w.title)} 열기">
+          ${useLive
+            ? `<div class="ph">불러오는 중…</div>`
+            : `<img loading="lazy" alt="" src="${esc(ogImage(w.repo))}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',textContent:'미리보기 없음'}))">`}
+          <span class="veil"></span>
+          <span class="badge ${w.url ? "live" : ""}">${w.url ? (useLive ? "LIVE" : "PAGES") : "GITHUB"}</span>
+        </a>
+        <div class="body">
+          <div class="title"><h2>${esc(w.title)}</h2><span class="repo">${esc(w.repo)}</span></div>
+          <p class="desc">${esc(w.desc || "설명 없음")}</p>
+          <div class="meta">
+            ${w.lang ? `<span class="chip lang" style="--dot:${LANG_DOT[w.lang] || "var(--accent)"}">${esc(w.lang)}</span>` : ""}
+            ${(w.tags || []).map((t) => `<span class="chip">${esc(t)}</span>`).join("")}
+            ${w.pushed ? `<span>· ${fmtDate(w.pushed)} 수정</span>` : ""}
+          </div>
+          <div class="actions">
+            <a class="btn primary go" href="${esc(open)}" target="_blank" rel="noopener">${w.url ? "열기 ↗" : "GitHub에서 보기 ↗"}</a>
+            ${(w.links || []).map((l) => `<a class="btn" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join("")}
+            ${w.url ? `<a class="btn" href="${esc(gh)}" target="_blank" rel="noopener" title="GitHub 리포">GitHub</a>` : ""}
+          </div>
+        </div>`;
+      grid.appendChild(card);
+      const th = card.querySelector(".thumb");
+      if (useLive) { fitFrame(th); io ? io.observe(th) : loadFrame(th); }
+    }
+  }
+  status.textContent = `${works.length}개 작업`;
+  render();
+  refreshFromGitHub();
+
+  // ---------- 테마 ----------
+  const themeBtn = $("#themeBtn");
+  const applyTheme = (t) => { if (t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme; };
+  try { applyTheme(localStorage.getItem("works:theme") || ""); } catch {}
+  themeBtn.addEventListener("click", () => {
+    const cur = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+    const next = cur === "dark" ? "light" : "dark";
+    applyTheme(next); try { localStorage.setItem("works:theme", next); } catch {}
+  });
+
+  // ---------- 설치 ----------
+  const installBtn = $("#installBtn"), sheet = $("#sheet"), sheetBg = $("#sheetBg"), sheetBody = $("#sheetBody");
+  let deferred = null;
+  const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  const inApp = /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\//i.test(navigator.userAgent);
+  const showSheet = (html) => { sheetBody.innerHTML = html; sheet.classList.add("on"); sheetBg.classList.add("on"); };
+  const hideSheet = () => { sheet.classList.remove("on"); sheetBg.classList.remove("on"); };
+  $("#sheetClose").addEventListener("click", hideSheet); sheetBg.addEventListener("click", hideSheet);
+
+  window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferred = e; if (!standalone) installBtn.hidden = false; });
+  window.addEventListener("appinstalled", () => { installBtn.hidden = true; deferred = null; });
+  if (!standalone && (isIOS || inApp)) installBtn.hidden = false;
+  installBtn.addEventListener("click", async () => {
+    if (deferred) { deferred.prompt(); try { await deferred.userChoice; } catch {} deferred = null; return; }
+    if (inApp) {
+      showSheet(`<p style="margin:0;color:var(--muted);font-size:14px;line-height:1.6">카카오톡·네이버 앱 안에서는 설치가 되지 않습니다. 오른쪽 위 메뉴에서 <b>다른 브라우저로 열기</b>(크롬·Safari)를 누른 뒤 다시 설치해 주세요.</p>
+        <ol><li>주소: <code>${esc(location.href)}</code></li></ol>
+        <div class="row"><button class="btn" id="copyUrl">주소 복사</button></div>`);
+      $("#copyUrl")?.addEventListener("click", () => navigator.clipboard?.writeText(location.href));
+      return;
+    }
+    if (isIOS) {
+      showSheet(`<ol>
+        <li>Safari 아래쪽 <b>공유</b> 버튼(네모에서 화살표가 올라가는 모양)을 누릅니다.</li>
+        <li>목록에서 <b>홈 화면에 추가</b>를 고릅니다.</li>
+        <li>오른쪽 위 <b>추가</b>를 누르면 홈 화면에 앱 아이콘이 생깁니다.</li></ol>`);
+      return;
+    }
+    showSheet(`<ol>
+      <li>크롬: 주소창 오른쪽 <b>설치</b> 아이콘 또는 ⋮ 메뉴 → <b>앱 설치</b> / <b>홈 화면에 추가</b></li>
+      <li>삼성 인터넷: 아래 ≡ 메뉴 → <b>현재 페이지 추가</b> → <b>홈 화면</b></li></ol>`);
+  });
+
+  // ---------- 서비스 워커 ----------
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  }
+})();
+</script>
+</body>
+</html>
