@@ -1,7 +1,7 @@
 {
-  "name": "작업 모음 · kwonyujin119",
-  "short_name": "작업모음",
-  "description": "GitHub에서 작업한 페이지들을 미리보기와 링크로 한곳에 모은 앱",
+  "name": "다 비치",
+  "short_name": "다 비치",
+  "description": "내 오늘 안으로 다 비치",
   "id": "/testall/",
   "start_url": "/testall/",
   "scope": "/testall/",
