@@ -221,6 +221,23 @@
   }
   .toast.on { opacity: 1; transform: translate(-50%, 0); }
   .toast.bad { background: #b91c1c; }
+
+  /* 상단 탭 박스 + 구분선 */
+  .tabzone { display: flex; flex-wrap: wrap; gap: 12px; margin: 2px 0 0; }
+  .tabbox {
+    flex: 1 1 260px; max-width: 380px; display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px; border-radius: 16px; background: var(--card); border: 1px solid var(--line);
+    box-shadow: var(--shadow); transition: transform .15s ease, border-color .15s ease;
+  }
+  .tabbox:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+  .tabbox .ic { width: 44px; height: 44px; flex: none; border-radius: 12px; display: grid; place-items: center; font-size: 22px;
+    background: linear-gradient(135deg, #4f46e5, #06b6d4); color: #fff; }
+  .tabbox b { display: block; font-size: 15.5px; letter-spacing: -.01em; }
+  .tabbox small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--muted); }
+  .tabbox .go { margin-left: auto; color: var(--muted); font-size: 18px; }
+  .divider { display: flex; align-items: center; gap: 12px; margin: 18px 0 14px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .08em; }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .divider::before { flex: 0 0 18px; }
 </style>
 </head>
 <body class="locked">
@@ -258,6 +275,14 @@
 </header>
 
 <main>
+  <nav class="tabzone" aria-label="바로가기">
+    <a class="tabbox" href="roadmap.html">
+      <span class="ic" aria-hidden="true">🎓</span>
+      <span><b>학위 취득 로드맵</b><small>학사학위 · 자격증 · 군 교육 학점인정</small></span>
+      <span class="go" aria-hidden="true">›</span>
+    </a>
+  </nav>
+  <div class="divider" role="separator">작업장</div>
   <p class="status" id="status"></p>
   <div class="admin-banner"><b>🛡 관리자 모드</b> · 카드마다 공개 스위치가 있습니다. 끄면 비공개가 되어 일반 사용자에게 보이지 않고, 관리자에게만 흐리게 보입니다. 바꾼 뒤 아래 <b>저장</b>을 누르세요.</div>
   <section class="grid" id="grid" aria-live="polite"></section>

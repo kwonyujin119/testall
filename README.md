@@ -24,6 +24,7 @@ GitHub에서 작업한 페이지들을 **미리보기 + 링크** 카드로 한 �
 | 파일 | 역할 |
 |---|---|
 | `index.html` | 화면·동작 전부 (CSS·JS 포함) |
+| `roadmap.html` | 학위 취득 로드맵 (상단 탭 박스에서 연결, 접속 코드 필요) |
 | `data.js` | 카드 데이터 |
 | `visibility.json` | 비공개 카드 목록 (관리자 화면에서 저장) |
 | `manifest.webmanifest`, `sw.js`, `icons/` | PWA 설치·오프라인 |

@@ -1,8 +1,9 @@
 // 다 비치 서비스 워커 — 앱 껍데기는 캐시, 내용은 네트워크 우선
-const VERSION = "works-v3";
+const VERSION = "works-v4";
 const SHELL = [
   "./",
   "./index.html",
+  "./roadmap.html",
   "./data.js",
   "./visibility.json",
   "./manifest.webmanifest",
