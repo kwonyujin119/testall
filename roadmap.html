@@ -71,6 +71,32 @@
   .note { border-left: 4px solid var(--warn); background: color-mix(in srgb, var(--warn) 10%, var(--card)); padding: 10px 12px; border-radius: 8px; font-size: 13.5px; margin: 8px 0 14px; }
   .tip { border-left: 4px solid var(--ok); background: color-mix(in srgb, var(--ok) 10%, var(--card)); padding: 10px 12px; border-radius: 8px; font-size: 13.5px; margin: 8px 0 14px; }
   .muted { color: var(--muted); font-size: 13px; }
+  .form { display: grid; gap: 12px; margin: 4px 0 16px; }
+  .fl { display: grid; gap: 6px; font-size: 14px; font-weight: 700; }
+  .fl select, .fl input[type=number], .cert select, .cert input[type=number] {
+    height: 42px; border-radius: 10px; border: 1px solid var(--line); background: var(--card2); color: var(--text);
+    padding: 0 10px; font: inherit; font-weight: 500; font-size: 15px; min-width: 0; width: 100%; }
+  .hint { font-size: 12.5px; color: var(--muted); font-weight: 500; }
+  .cert { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .cert.custom { grid-template-columns: 1fr 72px auto auto; }
+  .cert label { font-size: 12.5px; font-weight: 600; white-space: nowrap; display: flex; gap: 4px; align-items: center; }
+  .mini { appearance: none; border: 1px dashed var(--line); background: transparent; color: var(--text); border-radius: 10px; padding: 8px 12px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; justify-self: start; }
+  .x { appearance: none; border: 0; background: transparent; color: var(--muted); font-size: 18px; cursor: pointer; padding: 4px 6px; }
+  .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 0 0 12px; }
+  @media (min-width: 640px) { .kpis { grid-template-columns: repeat(4, 1fr); } }
+  .kpi { background: var(--card2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .kpi small { display: block; color: var(--muted); font-size: 12px; font-weight: 600; }
+  .kpi b { font-size: 20px; letter-spacing: -.01em; }
+  .kpi.hl { border-color: var(--accent); }
+  .plan { padding-left: 0; list-style: none; counter-reset: p; }
+  .plan > li { counter-increment: p; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px 4px; margin-bottom: 10px; }
+  .plan > li > label { font-size: 15px; display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
+  .plan > li > label::before { content: counter(p) "."; font-weight: 800; color: var(--accent); }
+  .plan > li > label input { width: 18px; height: 18px; accent-color: var(--accent); margin: 0; }
+  .plan .when { display: inline-block; margin-left: 6px; font-size: 12px; color: var(--muted); font-weight: 600; }
+  .plan > li.done { opacity: .6; }
+  .plan > li.done > label b { text-decoration: line-through; }
+  .plan ul { margin-top: 6px; }
 
 </style>
 </head>
@@ -82,6 +108,7 @@
   </div>
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" id="tab-ba" aria-controls="panel-ba" aria-selected="true">학사학위 취득 방법</button>
+    <button class="tab" role="tab" id="tab-plan" aria-controls="panel-plan" aria-selected="false">나의 학위 계획</button>
   </div>
 </header>
 
@@ -212,6 +239,111 @@
     <div class="note">이 페이지의 학점 수치는 2026년 11월 기준 공개 자료를 정리한 것입니다. 인정 기준은 매년 고시로 바뀌므로 신청 전에 <a href="https://www.cb.or.kr/" target="_blank" rel="noopener">학점은행(cb.or.kr)</a>의 최신 고시와 <a href="https://www.cb.or.kr/creditbank/persInfo/nCreditRegInfo.do" target="_blank" rel="noopener">학점인정 신청 안내</a>를 확인하세요. 자격 확인서는 <a href="https://www.q-net.or.kr/" target="_blank" rel="noopener">Q-Net</a>에서 발급합니다.</div>
   </section>
 </div>
+<div id="panel-plan" role="tabpanel" aria-labelledby="tab-plan" hidden>
+  <section class="box">
+    <h2>나의 학위 계획 계산기</h2>
+    <p class="lead">가진 학점을 입력하면 원격 강좌로 몇 학점을 들어야 하는지, 언제 학위를 받을 수 있는지 계산합니다. 입력값은 이 기기에만 저장됩니다.</p>
+
+    <div class="form">
+      <label class="fl">최종 학력
+        <select id="pEdu">
+          <option value="0">고졸 (전적 학점 없음)</option>
+          <option value="80">전문대 2년제 졸업 (80학점)</option>
+          <option value="120">전문대 3년제 졸업 (120학점)</option>
+          <option value="custom">대학 중퇴 · 기타 (학점 직접 입력)</option>
+        </select>
+      </label>
+      <label class="fl" id="pEduCustomWrap" hidden>전적 대학 이수 학점
+        <input id="pEduCustom" type="number" min="0" max="140" inputmode="numeric" value="0">
+      </label>
+
+      <div class="fl">자격증
+        <div id="pCerts"></div>
+        <button type="button" class="mini" id="pAddCert">+ 자격증 추가</button>
+        <span class="hint">전공 관련 자격은 최대 3개, 타전공 자격은 1개까지만 계산됩니다.</span>
+      </div>
+
+      <label class="fl">부사관 교육 인정 학점 <span class="hint">평가인정 조회로 확인된 학점만 입력하세요 (모르면 0)</span>
+        <input id="pArmy" type="number" min="0" max="60" inputmode="numeric" value="0">
+      </label>
+      <label class="fl">독학사 시험 활용
+        <select id="pDok">
+          <option value="0">안 함</option>
+          <option value="20">교양 과정 5과목 합격 (20학점)</option>
+          <option value="50">교양 5과목 + 전공기초 6과목 (50학점)</option>
+        </select>
+      </label>
+      <label class="fl">원격 강좌 시작 학기
+        <select id="pStart">
+          <option value="2027-1">2027년 1학기 (3월 개강)</option>
+          <option value="2027-2">2027년 2학기 (8~9월 개강)</option>
+          <option value="2028-1">2028년 1학기 (3월 개강)</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="kpis" id="pKpis"></div>
+    <div class="tbl"><table>
+      <thead><tr><th>학기</th><th>원격 강좌</th><th>누적</th><th>할 일</th></tr></thead>
+      <tbody id="pSems"></tbody>
+    </table></div>
+    <div id="pWarn"></div>
+  </section>
+
+  <section class="box">
+    <h2>단계별로 할 일과 접속 경로</h2>
+    <p class="lead">위에서부터 순서대로 하면 됩니다. 끝낸 단계는 체크해 두세요 (이 기기에 저장).</p>
+    <ol class="plan">
+      <li data-k="s1"><label><input type="checkbox"> <b>서류 모으기</b></label> <span class="when">지금 ~ 12월</span>
+        <ul>
+          <li>최종학력 증명서: 출신 학교 또는 <a href="https://www.gov.kr/" target="_blank" rel="noopener">정부24</a>에서 "졸업증명서"를 검색해 발급</li>
+          <li>국가기술자격증: <a href="https://www.q-net.or.kr/" target="_blank" rel="noopener">Q-Net</a> 로그인 → 자격증 발급/확인서 발급 메뉴</li>
+          <li>부사관 교육 수료 내역: <a href="https://www.gov.kr/" target="_blank" rel="noopener">정부24</a>에서 "군경력증명서" 검색, 또는 교육 수료증 사본</li>
+        </ul></li>
+      <li data-k="s2"><label><input type="checkbox"> <b>전공 정하기</b></label> <span class="when">12월</span>
+        <ul>
+          <li><a href="https://www.cb.or.kr/creditbank/base/nMain.do" target="_blank" rel="noopener">학점은행 누리집</a> → <b>표준교육과정</b> 메뉴에서 전공별 전공필수 과목과 전공 관련 자격을 확인</li>
+          <li>내 자격증이 <b>전공 관련 자격</b>으로 들어가는 전공을 고릅니다. 그래야 자격증 학점이 전공 60학점에 들어갑니다.</li>
+          <li>무엇이 학점으로 인정되는지: <a href="https://www.cb.or.kr/creditbank/eduIntro/nEduIntro2_5.do" target="_blank" rel="noopener">학점인정 대상</a></li>
+        </ul></li>
+      <li data-k="s3"><label><input type="checkbox"> <b>원격 교육기관 고르고 수강 신청</b></label> <span class="when">12월 ~ 2월 (1학기 기준)</span>
+        <ul>
+          <li>교육부 <b>평가인정을 받은 기관의 과목</b>만 학점이 됩니다. 학점은행 누리집의 교육훈련기관 검색에서 기관과 과목을 확인하세요.</li>
+          <li>첫 학기부터 <b>24학점(8과목)</b>을 꽉 채워 신청합니다. 전공필수 과목을 먼저 넣습니다.</li>
+          <li>"학위 설계 무료" 광고 업체는 특정 기관 수강을 유도하는 경우가 많습니다. 과목은 직접 비교하세요.</li>
+        </ul></li>
+      <li data-k="s4"><label><input type="checkbox"> <b>학습자 등록</b></label> <span class="when">2027년 1월 (분기별: 1·4·7·10월)</span>
+        <ul>
+          <li>접속: <a href="https://www.cb.or.kr/creditbank/persInfo/nDocMenReg.do" target="_blank" rel="noopener">학점은행 → 학습자 등록</a> (방법: <a href="https://www.cb.or.kr/creditbank/stuHelp/stuHelp1_2.do" target="_blank" rel="noopener">학습자등록 신청 안내</a>)</li>
+          <li>수수료 4,000원 · 한 번만 하면 됩니다. 희망 학위과정(학사)과 전공을 이때 고릅니다.</li>
+          <li>학위 신청 마감일 75일 전까지 등록돼 있어야 합니다. 미루지 말고 첫 분기에 합니다.</li>
+          <li>분기별 접수 기간: <a href="https://www.cb.or.kr/creditbank/stuHelp/stuHelp1_6.do" target="_blank" rel="noopener">신청 시기 및 방법</a></li>
+        </ul></li>
+      <li data-k="s5"><label><input type="checkbox"> <b>학점인정 신청 (자격증 · 전적대 · 군 교육)</b></label> <span class="when">학습자 등록과 같은 분기</span>
+        <ul>
+          <li>접속: <a href="https://www.cb.or.kr/creditbank/persInfo/nCreditRegInfo.do" target="_blank" rel="noopener">학점은행 → 학점인정 신청</a></li>
+          <li>수수료 학점당 1,000원 · 처리에 약 2개월 걸립니다. 학위 신청 직전에 넣으면 늦습니다.</li>
+          <li>원격 강좌 학점은 기관 안내에 따라 처리되므로, 학기가 끝날 때마다 반영됐는지 확인합니다.</li>
+        </ul></li>
+      <li data-k="s6"><label><input type="checkbox"> <b>(선택) 독학사 시험</b></label> <span class="when">연 1회 · 일정은 누리집 공지</span>
+        <ul>
+          <li>접속: <a href="https://bdes.nile.or.kr/" target="_blank" rel="noopener">독학학위제 누리집</a> → 시험 일정·원서 접수</li>
+          <li>교양 과목당 4학점(최대 20), 전공기초 과목당 5학점(최대 30). 교양 30학점을 빨리 채우는 데 유용합니다.</li>
+        </ul></li>
+      <li data-k="s7"><label><input type="checkbox"> <b>졸업 요건 점검</b></label> <span class="when">학위 신청 한 달 전</span>
+        <ul>
+          <li>총 140 · 전공 60 · 교양 30 · 전공필수 · <b>평가인정 수업 18학점 이상</b>이 모두 찼는지 학점은행 누리집 로그인 후 학점 현황에서 확인</li>
+          <li>헷갈리는 점: <a href="https://www.cb.or.kr/creditbank/stuHelp/nStuHelp3_1.do" target="_blank" rel="noopener">자주 하는 질문</a> · <a href="https://www.cb.or.kr/creditbank/eduIntro/nEduIntro3_1.do" target="_blank" rel="noopener">제도 이용 주의사항</a></li>
+        </ul></li>
+      <li data-k="s8"><label><input type="checkbox"> <b>학위 신청</b></label> <span class="when">6/15~7/15 (8월 수여) · 12/15~1/15 (2월 수여)</span>
+        <ul>
+          <li>접속: <a href="https://www.cb.or.kr/creditbank/eduIntro/nEduIntro4_1.do" target="_blank" rel="noopener">학위신청 안내</a> → <a href="https://www.cb.or.kr/creditbank/stuHelp/stuHelp1_5.do" target="_blank" rel="noopener">학위 신청 방법</a></li>
+          <li>요건을 다 채워도 <b>기간 안에 신청하지 않으면 학위가 나오지 않습니다.</b></li>
+        </ul></li>
+    </ol>
+    <p class="muted">메뉴 이름과 위치는 누리집 개편으로 바뀔 수 있습니다. 2026년 11월 기준으로 확인한 주소입니다.</p>
+  </section>
+</div>
 </main>
 
 <script>
@@ -226,6 +358,106 @@
       document.getElementById(x.getAttribute("aria-controls")).hidden = !on;
     });
   }));
+
+  // ---------- 나의 학위 계획 ----------
+  const $ = (id) => document.getElementById(id);
+  const KEY = "roadmap:plan";
+  const CERT = [
+    ["기사", 20], ["산업기사", 16], ["기능사", 14], ["기능장", 39], ["기술사", 45],
+    ["컴퓨터활용능력 1급", 14], ["컴퓨터활용능력 2급", 6], ["워드프로세서", 4], ["기타 (학점 직접 입력)", -1]
+  ];
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || "null"); } catch { return null; } };
+  const save = (o) => { try { localStorage.setItem(KEY, JSON.stringify(o)); } catch {} };
+  const st = Object.assign({ edu: "0", eduCustom: 0, certs: [], army: 0, dok: "0", start: "2027-1", done: {} }, load() || {});
+
+  function certRow(c, i) {
+    const custom = CERT[c.t][1] < 0;
+    const d = document.createElement("div"); d.className = "cert" + (custom ? " custom" : ""); d.dataset.i = i;
+    d.innerHTML = `<select aria-label="자격 종류">${CERT.map(([n, v], k) => `<option value="${k}" ${k == c.t ? "selected" : ""}>${n}${v > 0 ? ` (${v}학점)` : ""}</option>`).join("")}</select>
+      ${custom ? `<input type="number" min="0" max="45" value="${c.v || 0}" aria-label="인정 학점">` : ""}
+      <label><input type="checkbox" ${c.major ? "checked" : ""}> 전공관련</label>
+      <button type="button" class="x" aria-label="삭제">×</button>`;
+    return d;
+  }
+  function drawCerts() {
+    const box = $("pCerts"); box.innerHTML = "";
+    st.certs.forEach((c, i) => box.appendChild(certRow(c, i)));
+  }
+  $("pCerts").addEventListener("input", (e) => {
+    const row = e.target.closest(".cert"); if (!row) return; const c = st.certs[row.dataset.i];
+    if (e.target.tagName === "SELECT") { c.t = +e.target.value; drawCerts(); }
+    else if (e.target.type === "number") c.v = +e.target.value || 0;
+    else if (e.target.type === "checkbox") c.major = e.target.checked;
+    calc();
+  });
+  $("pCerts").addEventListener("click", (e) => {
+    if (!e.target.classList.contains("x")) return;
+    st.certs.splice(+e.target.closest(".cert").dataset.i, 1); drawCerts(); calc();
+  });
+  $("pAddCert").addEventListener("click", () => { st.certs.push({ t: 0, v: 0, major: true }); drawCerts(); calc(); });
+
+  const bind = (id, k, num) => { const el = $(id); el.value = st[k]; el.addEventListener("input", () => { st[k] = num ? (+el.value || 0) : el.value; calc(); }); };
+  bind("pEdu", "edu"); bind("pEduCustom", "eduCustom", true); bind("pArmy", "army", true); bind("pDok", "dok"); bind("pStart", "start");
+
+  function calc() {
+    $("pEduCustomWrap").hidden = st.edu !== "custom";
+    const prior = st.edu === "custom" ? Math.min(140, st.eduCustom) : +st.edu;
+    const vals = st.certs.map((c) => ({ v: CERT[c.t][1] < 0 ? (c.v || 0) : CERT[c.t][1], major: c.major }));
+    const take = (arr, n) => arr.sort((a, b) => b.v - a.v).slice(0, n);
+    const majorC = take(vals.filter((x) => x.major), 3), otherC = take(vals.filter((x) => !x.major), 1);
+    const certSum = [...majorC, ...otherC].reduce((s, x) => s + x.v, 0);
+    const dropped = vals.length - majorC.length - otherC.length;
+    const dok = +st.dok, army = Math.max(0, st.army);
+    const pre = prior + certSum + army + dok;
+
+    let need = Math.max(0, 140 - pre);
+    const warn = [];
+    if (need < 18) { warn.push(`평가인정 수업(원격 강좌 등) <b>18학점 이상</b>은 반드시 들어야 해서, 계산상 ${need}학점이어도 18학점으로 잡았습니다.`); need = 18; }
+    const gyoyangGap = st.edu === "0" ? Math.max(0, 30 - (dok >= 20 ? 20 : 0)) : 0;
+    if (gyoyangGap > need) { warn.push(`교양 30학점을 채워야 해서 원격 강좌를 ${gyoyangGap}학점으로 늘렸습니다. 자격증으로는 교양을 채울 수 없습니다.`); need = gyoyangGap; }
+    if (dropped > 0) warn.push(`자격증 ${dropped}개는 개수 제한(전공 관련 3개, 타전공 1개) 때문에 계산에서 뺐습니다. 같은 종목은 높은 등급 하나만 인정되는 점도 확인하세요.`);
+    if (majorC.length === 0 && st.certs.length) warn.push("전공 관련 자격이 없으면 자격증 학점이 일반선택으로만 들어가 전공 60학점은 수업으로 채워야 합니다.");
+    if (dok > 0) warn.push("독학사 합격 학점이 연간 42학점 한도에서 빠지는지는 공식 자료로 확인하지 못해, 원격 강좌 일정은 한도 그대로 계산했습니다.");
+    if (army > 0) warn.push("부사관 교육 학점은 평가인정 조회로 확인된 경우에만 넣으세요. 확인 전이면 0으로 두고 계획하는 편이 안전합니다.");
+    warn.push("전공필수 과목은 전공마다 다릅니다. 표준교육과정에서 확인한 전공필수를 원격 강좌 첫 학기에 먼저 넣으세요.");
+
+    // 학기 배분: 학기당 24, 연 42
+    let [y, h] = st.start.split("-").map(Number), left = need, acc = pre, rows = [], yearUsed = {};
+    while (left > 0 && rows.length < 12) {
+      const used = yearUsed[y] || 0, cap = Math.min(24, 42 - used), n = Math.min(cap, left);
+      if (n > 0) {
+        left -= n; acc += n; yearUsed[y] = used + n;
+        rows.push({ y, h, n, acc: Math.min(acc, 140 + 999), last: left === 0 });
+      }
+      if (h === 1) h = 2; else { h = 1; y++; }
+    }
+    const last = rows[rows.length - 1];
+    const deg = last ? (last.h === 1 ? `${last.y}년 8월` : `${last.y + 1}년 2월`) : "-";
+    const apply = last ? (last.h === 1 ? `${last.y}.6.15 ~ 7.15` : `${last.y}.12.15 ~ ${last.y + 1}.1.15`) : "";
+
+    if (last && last.h === 1) warn.unshift(`마지막 학기가 1학기(3~6월)이면 성적이 나오자마자 7월 15일까지 학위를 신청해야 해서 일정이 빠듯합니다. 수강하는 교육기관에 <b>8월 학위 신청이 가능한 학기 일정</b>인지 먼저 확인하세요. 안 되면 ${last.y + 1}년 2월 수여가 됩니다.`);
+    $("pKpis").innerHTML = `
+      <div class="kpi"><small>이미 가진 학점</small><b>${Math.min(pre, 140)}</b> / 140</div>
+      <div class="kpi"><small>원격 강좌로 들을 학점</small><b>${need}</b></div>
+      <div class="kpi"><small>필요 학기</small><b>${rows.length}학기</b></div>
+      <div class="kpi hl"><small>예상 학위 수여</small><b>${deg}</b></div>`;
+    $("pSems").innerHTML = rows.map((r, i) => `<tr>
+      <td>${r.y}년 ${r.h}학기<br><span class="muted">${r.h === 1 ? "3~6월" : "9~12월"}</span></td>
+      <td class="num">${r.n}학점</td><td class="num">${r.acc}</td>
+      <td>${[i === 0 ? "전공필수 우선 수강" : "", r.last ? `<b>학위 신청 ${apply}</b>` : "학기 끝나면 학점 반영 확인"].filter(Boolean).join(" · ")}</td></tr>`).join("");
+    $("pWarn").innerHTML = warn.map((w) => `<div class="note">${w}</div>`).join("");
+    save(st);
+  }
+
+  // 단계 체크
+  document.querySelectorAll(".plan > li").forEach((li) => {
+    const cb = li.querySelector("input"), k = li.dataset.k;
+    cb.checked = !!st.done[k]; li.classList.toggle("done", cb.checked);
+    cb.addEventListener("change", () => { st.done[k] = cb.checked; li.classList.toggle("done", cb.checked); save(st); });
+  });
+
+  drawCerts(); calc();
+  if (location.hash === "#plan") $("tab-plan").click();
 })();
 </script>
 </body>
