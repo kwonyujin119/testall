@@ -172,6 +172,9 @@
   .admin-pill { display: none; background: linear-gradient(135deg, #f59e0b, #eab308); color: #1f1300; border: 0; font-weight: 800; }
   body.admin .admin-pill { display: inline-flex; }
   body.admin #keyBtn { display: none; }
+  .logout-btn { display: none; }
+  body.admin .logout-btn { display: inline-flex; }
+  @media (max-width: 420px) { .logout-btn { width: 38px; height: 38px; padding: 0; justify-content: center; } }
   body.admin header { border-bottom: 2px solid #f59e0b; }
   body.admin header::before {
     content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px;
@@ -263,6 +266,7 @@
     <button class="btn primary" id="installBtn" hidden aria-label="앱 설치" title="앱 설치">⤓<span class="lbl-long"> 앱 설치</span></button>
     <button class="btn admin-pill" id="adminPill" title="관리자 메뉴">🛡 관리자</button>
     <button class="btn icon-btn" id="keyBtn" title="관리자 로그인" aria-label="관리자 로그인">🔑</button>
+    <button class="btn logout-btn" id="logoutBtn" title="관리자 로그아웃" aria-label="관리자 로그아웃">⏻<span class="lbl-long"> 로그아웃</span></button>
     <button class="btn icon-btn" id="themeBtn" title="테마 전환" aria-label="테마 전환">◐</button>
   </div>
   <div class="tools">
@@ -635,6 +639,11 @@
       if (await sha256($("#adminCode").value.trim()) === H_ADMIN) { hideSheet(); setRole("admin"); toast("관리자로 로그인했습니다"); }
       else { $("#adminErr").textContent = "관리자 코드가 맞지 않습니다"; $("#adminCode").select(); }
     });
+  });
+
+  $("#logoutBtn").addEventListener("click", () => {
+    if (changedCount() && !confirm("저장하지 않은 공개 설정 변경이 있습니다. 버리고 로그아웃할까요?")) return;
+    setRole("user"); toast("관리자에서 로그아웃했습니다");
   });
 
   $("#adminPill").addEventListener("click", () => {

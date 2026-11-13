@@ -72,39 +72,9 @@
   .tip { border-left: 4px solid var(--ok); background: color-mix(in srgb, var(--ok) 10%, var(--card)); padding: 10px 12px; border-radius: 8px; font-size: 13.5px; margin: 8px 0 14px; }
   .muted { color: var(--muted); font-size: 13px; }
 
-  /* 잠금 */
-  body.locked header, body.locked main { visibility: hidden; }
-  .lock { position: fixed; inset: 0; z-index: 60; display: none; place-items: center; padding: 24px 16px; color: #e2e8f0;
-    background: radial-gradient(1000px 520px at 15% -10%, #312e81 0%, transparent 60%), radial-gradient(800px 480px at 110% 110%, #155e75 0%, transparent 55%), #0b1222; }
-  body.locked .lock { display: grid; }
-  .lock-box { width: 100%; max-width: 340px; text-align: center; }
-  .lock-box .em { font-size: 54px; }
-  .lock-box h2 { margin: 8px 0 4px; font-size: 21px; }
-  .lock-box p { margin: 0 0 18px; color: #94a3b8; font-size: 13.5px; }
-  .code-in { width: 100%; height: 56px; border-radius: 16px; border: 1px solid #334155; background: rgba(255,255,255,.06); color: #fff;
-    font-size: 24px; letter-spacing: .45em; text-indent: .45em; text-align: center; outline: none; }
-  .code-in:focus { border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96,165,250,.25); }
-  .lock-box button { width: 100%; height: 50px; margin-top: 12px; border: 0; border-radius: 999px; font-size: 16px; font-weight: 700; color: #fff; cursor: pointer;
-    background: linear-gradient(135deg, #4f46e5, #06b6d4); }
-  .lock-box .home { display: inline-block; margin-top: 14px; color: #94a3b8; font-size: 13px; }
-  .lock-err { min-height: 20px; margin-top: 12px; font-size: 13.5px; color: #f87171; }
-  .shake { animation: shake .35s; }
-  @keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
 </style>
 </head>
-<body class="locked">
-<div class="lock" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
-  <form class="lock-box" id="lockForm" autocomplete="off">
-    <div class="em" aria-hidden="true">🎓</div>
-    <h2 id="lockTitle">학위 취득 로드맵</h2>
-    <p>접속 코드를 입력하세요</p>
-    <input class="code-in" id="lockCode" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="12" aria-label="접속 코드">
-    <button type="submit">접속</button>
-    <div class="lock-err" id="lockErr" role="alert"></div>
-    <a class="home" href="./">← 다 비치로 돌아가기</a>
-  </form>
-</div>
-
+<body>
 <header>
   <div class="bar">
     <a class="back" href="./">← 다 비치</a>
@@ -246,29 +216,7 @@
 
 <script>
 (() => {
-  // 접속 코드: SHA-256("testall:" + 코드) 해시만 둠
-  const H_CODE = "9a974c81eae5b03719db6deb9e92679cabeba57020b8f02cb66a0989681c62ec";
-  const store = {
-    get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
-    set: (k, v) => { try { localStorage.setItem(k, v); } catch {} }
-  };
   try { const t = localStorage.getItem("works:theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
-  const sha256 = async (s) => {
-    const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("testall:" + s));
-    return Array.from(new Uint8Array(b), (x) => x.toString(16).padStart(2, "0")).join("");
-  };
-  const unlock = () => document.body.classList.remove("locked");
-  if (store.get("works:roadmap") === H_CODE || store.get("works:auth") === H_CODE) unlock();
-  else setTimeout(() => document.getElementById("lockCode").focus(), 50);
-
-  const form = document.getElementById("lockForm"), inp = document.getElementById("lockCode"), err = document.getElementById("lockErr");
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const v = inp.value.trim(); if (!v) return;
-    if (await sha256(v) === H_CODE) { store.set("works:roadmap", H_CODE); inp.value = ""; err.textContent = ""; unlock(); return; }
-    err.textContent = "코드가 맞지 않습니다";
-    form.classList.remove("shake"); void form.offsetWidth; form.classList.add("shake"); inp.select();
-  });
 
   // 탭 (현재 1개, 추가하면 자동으로 동작)
   const tabs = [...document.querySelectorAll('[role="tab"]')];
